@@ -141,9 +141,9 @@
     border: 1px solid var(--g, rgba(255,255,255,0.1));
     border-radius: 999px;
     padding: 6px 18px;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     color: var(--c, #fff);
     text-transform: uppercase;
     position: relative; z-index: 1;
@@ -302,10 +302,16 @@ const SCHEDULE = [
   { start: 23*60,   end: 24*60,   zone: 'night' },
 ];
 
+const TARIFFS = {
+  peak:  10.40,
+  semi:   7.28,
+  night:  3.77,
+};
+
 const ZONE_META = {
-  peak:  { label: 'Т1', name: 'Пиковая зона',    badge: 'Пик · Дорого',    cls: 'zone-peak'  },
-  semi:  { label: 'Т3', name: 'Полупиковая зона', badge: 'Полупик · Средне', cls: 'zone-semi'  },
-  night: { label: 'Т2', name: 'Ночная зона',      badge: 'Ночь · Дёшево',   cls: 'zone-night' },
+  peak:  { label: 'Т1', name: 'Пиковая зона',    badge: `10.40 руб./кВт·ч`,  cls: 'zone-peak'  },
+  semi:  { label: 'Т3', name: 'Полупиковая зона', badge: `7.28 руб./кВт·ч`,   cls: 'zone-semi'  },
+  night: { label: 'Т2', name: 'Ночная зона',      badge: `3.77 руб./кВт·ч`,   cls: 'zone-night' },
 };
 
 const DAYS = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
