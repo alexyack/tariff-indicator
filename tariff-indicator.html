@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0f">
+<title>Тариф ⚡</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --card: #13131a;
+    --border: rgba(255,255,255,0.07);
+    --peak-main: #ff3c3c;
+    --peak-glow: rgba(255,60,60,0.35);
+    --peak-dim:  rgba(255,60,60,0.12);
+    --semi-main: #f5a623;
+    --semi-glow: rgba(245,166,35,0.35);
+    --semi-dim:  rgba(245,166,35,0.12);
+    --night-main: #4fc3f7;
+    --night-glow: rgba(79,195,247,0.35);
+    --night-dim:  rgba(79,195,247,0.12);
+  }
+
+  html, body {
+    height: 100%; width: 100%;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* animated grain */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 128px;
+    animation: grain 0.4s steps(1) infinite;
+    pointer-events: none;
+  }
+  @keyframes grain {
+    0%,100%{background-position:0 0}
+    20%{background-position:-30px 10px}
+    40%{background-position:20px -20px}
+    60%{background-position:-10px 30px}
+    80%{background-position:25px -5px}
+  }
+
+  .screen {
+    position: relative; z-index: 1;
+    width: min(420px, 100vw);
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 24px 20px;
+    gap: 20px;
+  }
+
+  /* ── MAIN CARD ── */
+  .card {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 36px 28px 32px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.6s ease;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.7;
+    transition: background 0.6s ease;
+    pointer-events: none;
+  }
+
+  /* zone colour tokens applied by JS */
+  .zone-peak   { --c: var(--peak-main);  --g: var(--peak-glow);  --d: var(--peak-dim); }
+  .zone-semi   { --c: var(--semi-main);  --g: var(--semi-glow);  --d: var(--semi-dim); }
+  .zone-night  { --c: var(--night-main); --g: var(--night-glow); --d: var(--night-dim);}
+
+  .card { border-color: var(--g, var(--border)); }
+  .card::before { background: var(--g, transparent); }
+
+  /* pulse ring */
+  .pulse-ring {
+    position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 30px;
+    border: 2px solid var(--c, transparent);
+    opacity: 0;
+    animation: pulse-border 2.5s ease-out infinite;
+    pointer-events: none;
+  }
+  @keyframes pulse-border {
+    0%   { opacity: 0.6; transform: scale(1); }
+    100% { opacity: 0;   transform: scale(1.015); }
+  }
+
+  /* ── LABEL ── */
+  .tariff-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 22vw, 108px);
+    line-height: 0.9;
+    color: var(--c, #fff);
+    letter-spacing: 2px;
+    text-shadow: 0 0 40px var(--g, transparent), 0 0 80px var(--g, transparent);
+    transition: color 0.5s, text-shadow 0.5s;
+    position: relative; z-index: 1;
+    margin-bottom: 8px;
+  }
+
+  .tariff-name {
+    font-size: 13px;
+    font-weight: 300;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    position: relative; z-index: 1;
+    margin-bottom: 28px;
+    transition: color 0.5s;
+  }
+
+  /* ── BADGE ── */
+  .badge {
+    background: var(--d, rgba(255,255,255,0.06));
+    border: 1px solid var(--g, rgba(255,255,255,0.1));
+    border-radius: 999px;
+    padding: 6px 18px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--c, #fff);
+    text-transform: uppercase;
+    position: relative; z-index: 1;
+    transition: background 0.5s, border-color 0.5s, color 0.5s;
+    margin-bottom: 32px;
+  }
+
+  /* ── CLOCK ── */
+  .clock {
+    font-size: clamp(32px, 10vw, 48px);
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -1px;
+    position: relative; z-index: 1;
+    margin-bottom: 4px;
+  }
+  .date {
+    font-size: 11px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative; z-index: 1;
+  }
+
+  /* ── TIMELINE ── */
+  .timeline {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px 20px 16px;
+  }
+
+  .tl-title {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.25);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .tl-bar {
+    position: relative;
+    height: 10px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.06);
+    overflow: visible;
+    margin-bottom: 10px;
+  }
+
+  /* segments drawn by JS */
+  .seg {
+    position: absolute; top: 0; height: 100%;
+    border-radius: 3px;
+    opacity: 0.7;
+  }
+
+  /* current time marker */
+  .marker {
+    position: absolute; top: -5px;
+    width: 3px; height: 20px;
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(255,255,255,0.8);
+    transform: translateX(-50%);
+    transition: left 1s linear;
+  }
+
+  .tl-labels {
+    display: flex; justify-content: space-between;
+    font-size: 9px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.5px;
+  }
+
+  /* ── NEXT ZONE ── */
+  .next-card {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .next-left { display: flex; flex-direction: column; gap: 3px; }
+  .next-caption {
+    font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+  }
+  .next-zone-name {
+    font-size: 15px; font-weight: 600;
+    color: rgba(255,255,255,0.7);
+  }
+  .next-countdown {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--c, #fff);
+    letter-spacing: 1px;
+    transition: color 0.5s;
+  }
+</style>
+</head>
+<body>
+<div class="screen">
+
+  <!-- MAIN CARD -->
+  <div class="card" id="card">
+    <div class="pulse-ring"></div>
+    <div class="tariff-label" id="tlabel">Т1</div>
+    <div class="tariff-name" id="tname">Пиковая зона</div>
+    <div class="badge" id="tbadge">Дорого</div>
+    <div class="clock" id="clock">00:00:00</div>
+    <div class="date" id="dateline">—</div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="timeline">
+    <div class="tl-title">Расписание суток</div>
+    <div class="tl-bar" id="tlbar">
+      <div class="marker" id="marker"></div>
+    </div>
+    <div class="tl-labels">
+      <span>00</span><span>03</span><span>06</span><span>09</span>
+      <span>12</span><span>15</span><span>18</span><span>21</span><span>24</span>
+    </div>
+  </div>
+
+  <!-- NEXT ZONE -->
+  <div class="next-card">
+    <div class="next-left">
+      <span class="next-caption">Следующая зона</span>
+      <span class="next-zone-name" id="nextName">—</span>
+    </div>
+    <div class="next-countdown" id="nextCountdown">0:00</div>
+  </div>
+
+</div>
+
+<script>
+// ── MOSCOW 3-TARIFF SCHEDULE ─────────────────────────────────────────────────
+// Each entry: [startH, startM, endH, endM, zone]
+// zone: 'peak' | 'semi' | 'night'
+const SCHEDULE = [
+  // night  23:00 → 07:00  (split across midnight)
+  { start: 0*60,    end: 7*60,    zone: 'night' },
+  // peak   07:00 → 10:00
+  { start: 7*60,    end: 10*60,   zone: 'peak'  },
+  // semi   10:00 → 17:00
+  { start: 10*60,   end: 17*60,   zone: 'semi'  },
+  // peak   17:00 → 21:00
+  { start: 17*60,   end: 21*60,   zone: 'peak'  },
+  // semi   21:00 → 23:00
+  { start: 21*60,   end: 23*60,   zone: 'semi'  },
+  // night  23:00 → 24:00
+  { start: 23*60,   end: 24*60,   zone: 'night' },
+];
+
+const ZONE_META = {
+  peak:  { label: 'Т1', name: 'Пиковая зона',    badge: 'Пик · Дорого',    cls: 'zone-peak'  },
+  semi:  { label: 'Т3', name: 'Полупиковая зона', badge: 'Полупик · Средне', cls: 'zone-semi'  },
+  night: { label: 'Т2', name: 'Ночная зона',      badge: 'Ночь · Дёшево',   cls: 'zone-night' },
+};
+
+const DAYS = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+const MONTHS = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+
+function minutesNow() {
+  const d = new Date();
+  return d.getHours()*60 + d.getMinutes();
+}
+
+function getZone(min) {
+  for (const s of SCHEDULE) if (min >= s.start && min < s.end) return s.zone;
+  return 'night';
+}
+
+function getNext(min) {
+  // find current slot end
+  for (const s of SCHEDULE) {
+    if (min >= s.start && min < s.end) {
+      // next slot starts at s.end (mod 1440)
+      const nextStart = s.end % 1440;
+      const nz = getZone(nextStart === 1440 ? 0 : nextStart);
+      const minsLeft = s.end - min;
+      return { zone: nz, minsLeft };
+    }
+  }
+  return { zone: 'night', minsLeft: 0 };
+}
+
+function pad2(n) { return String(n).padStart(2,'0'); }
+
+function formatCountdown(mins) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return h > 0 ? `${h}ч ${pad2(m)}м` : `${m}м`;
+}
+
+// Build timeline segments once
+function buildTimeline() {
+  const bar = document.getElementById('tlbar');
+  const totalMin = 24*60;
+  SCHEDULE.forEach(s => {
+    const seg = document.createElement('div');
+    seg.className = 'seg';
+    seg.style.left   = (s.start / totalMin * 100) + '%';
+    seg.style.width  = ((s.end - s.start) / totalMin * 100) + '%';
+    const colors = { peak: '#ff3c3c', semi: '#f5a623', night: '#4fc3f7' };
+    seg.style.background = colors[s.zone];
+    bar.appendChild(seg);
+  });
+}
+
+let currentZone = null;
+
+function tick() {
+  const now = new Date();
+  const min = now.getHours()*60 + now.getMinutes();
+  const sec = now.getSeconds();
+  const zone = getZone(min);
+  const meta = ZONE_META[zone];
+
+  // clock
+  document.getElementById('clock').textContent =
+    `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(sec)}`;
+
+  // date
+  document.getElementById('dateline').textContent =
+    `${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
+
+  // zone change
+  if (zone !== currentZone) {
+    currentZone = zone;
+    const card = document.getElementById('card');
+    card.className = 'card ' + meta.cls;
+    document.getElementById('tlabel').textContent = meta.label;
+    document.getElementById('tname').textContent  = meta.name;
+    document.getElementById('tbadge').textContent  = meta.badge;
+    document.querySelector('.next-countdown').style.color = `var(--c)`;
+  }
+
+  // marker
+  const pct = ((min*60 + sec) / (24*3600) * 100).toFixed(3);
+  document.getElementById('marker').style.left = pct + '%';
+
+  // next zone
+  const { zone: nz, minsLeft } = getNext(min);
+  const minsLeftExact = minsLeft - Math.floor(sec/60); // rough
+  document.getElementById('nextName').textContent = ZONE_META[nz].name;
+  document.getElementById('nextCountdown').textContent = formatCountdown(minsLeft);
+}
+
+buildTimeline();
+tick();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
